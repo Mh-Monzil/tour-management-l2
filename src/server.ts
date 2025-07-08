@@ -21,6 +21,40 @@ const startServer = async () => {
 
 startServer();
 
+process.on("unhandledRejection", (error) => {
+  console.log("Unhandled Rejection detected... Server shutting down...", error);
+  if (server) {
+    server.close(() => {
+      process.exit(1);
+    });
+  }
+
+  process.exit(1);
+});
+
+// if don't use try catch then
+process.on("uncaughtException", (error) => {
+  console.log("Uncaught Exception detected... Server shutting down...", error);
+  if (server) {
+    server.close(() => {
+      process.exit(1);
+    });
+  }
+
+  process.exit(1);
+});
+
+process.on("SIGTERM", () => {
+  console.log("Uncaught Exception detected... Server shutting down...");
+  if (server) {
+    server.close(() => {
+      process.exit(1);
+    });
+  }
+
+  process.exit(1);
+});
+
 /**
  * unhandled rejection error
  * uncaught rejection error
