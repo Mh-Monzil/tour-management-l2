@@ -1,23 +1,27 @@
 import { UserServices } from "./user.service";
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { NextFunction, Request, Response } from "express";
+import { Request, Response } from "express";
 import httpStatus from "http-status-codes";
+import { catchAsync } from "../../utils/catchAsync";
 
-const createUser = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const user = await UserServices.createUserService(req.body);
+const createUser = catchAsync(async (req: Request, res: Response) => {
+  const user = await UserServices.createUserService(req.body);
 
-    res.status(httpStatus.CREATED).json({
-      message: "User created successfully",
-      user,
-    });
-  } catch (err: any) {
-    // eslint-disable-next-line no-console
-    console.log(err);
-    next(err);
-  }
-};
+  res.status(httpStatus.CREATED).json({
+    message: "User created successfully",
+    user,
+  });
+});
+
+const getAllUsers = catchAsync(async (req: Request, res: Response) => {
+  const users = await UserServices.getAllUsers();
+
+  res.status(httpStatus.OK).json({
+    message: "User created successfully",
+    users,
+  });
+});
 
 export const UserController = {
   createUser,
+  getAllUsers,
 };
