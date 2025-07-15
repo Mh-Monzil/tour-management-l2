@@ -3,6 +3,7 @@ import httpStatus from "http-status-codes";
 import AppError from "../../errorHelpers/AppError";
 import { IUser } from "../user/user.interface";
 import { User } from "../user/user.model";
+import jwt from "jsonwebtoken";
 
 const credentialsLogin = async (payload: Partial<IUser>) => {
   const { email, password } = payload;
@@ -20,8 +21,16 @@ const credentialsLogin = async (payload: Partial<IUser>) => {
   if (!isPasswordMatched)
     throw new AppError(httpStatus.BAD_REQUEST, "Incorrect Password");
 
-  return {
+  const jwtPayload = {
+    userId: isUserExists._id,
     email: isUserExists.email,
+    role: isUserExists.role,
+  };
+
+  const accessToken = jwt.sign(jwtPayload, "secret", { expiresIn: "7d" });
+
+  return {
+    accessToken,
   };
 };
 
