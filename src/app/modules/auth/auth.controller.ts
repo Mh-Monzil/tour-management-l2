@@ -4,19 +4,17 @@ import { catchAsync } from "../../utils/catchAsync";
 import SendResponse from "../../utils/sendResponse";
 import { AuthServices } from "./auth.service";
 import AppError from "../../errorHelpers/AppError";
+import { setAuthCookies } from "../../utils/setCookie";
 
 const credentialsLogin = catchAsync(async (req: Request, res: Response) => {
   const loginInfo = await AuthServices.credentialsLogin(req.body);
 
-  res.cookie("accessToken", loginInfo.accessToken, {
-    httpOnly: true,
-    secure: false, // Set to true if using HTTPS
-  });
+  if (!loginInfo.accessToken || !loginInfo.refreshToken) {
+    throw new AppError(httpStatus.UNAUTHORIZED, "Authentication failed");
+  }
 
-  res.cookie("refreshToken", loginInfo.refreshToken, {
-    httpOnly: true,
-    secure: false, // Set to true if using HTTPS
-  });
+  // Set cookies for access and refresh tokens
+  setAuthCookies(res, loginInfo);
 
   SendResponse(res, {
     statusCode: httpStatus.OK,
@@ -32,6 +30,8 @@ const getNewAccessToken = catchAsync(async (req: Request, res: Response) => {
     throw new AppError(httpStatus.UNAUTHORIZED, "Refresh token is required");
   }
   const tokenInfo = await AuthServices.getNewAccessToken(refreshToken);
+
+  setAuthCookies(res, tokenInfo);
 
   SendResponse(res, {
     statusCode: httpStatus.OK,
