@@ -8,6 +8,11 @@ import AppError from "../../errorHelpers/AppError";
 const credentialsLogin = catchAsync(async (req: Request, res: Response) => {
   const loginInfo = await AuthServices.credentialsLogin(req.body);
 
+  res.cookie("accessToken", loginInfo.accessToken, {
+    httpOnly: true,
+    secure: false, // Set to true if using HTTPS
+  });
+
   res.cookie("refreshToken", loginInfo.refreshToken, {
     httpOnly: true,
     secure: false, // Set to true if using HTTPS
